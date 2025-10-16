@@ -290,5 +290,43 @@ const postComment = async (req: Request, res: Response) => {
   }
 };
 
-export { createJob, getJobs, getJobById, updateJob, deleteJob, applyToJob, acceptApplication, rejectApplication, postComment };
+// @desc    Mark a job as completed
+// @route   PUT /api/jobs/:id/complete
+// @access  Private (Client only, owner of job)
+const markJobCompleted = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
 
+    const job = await Job.findById(id);
+
+    if (!job) {
+      return res.status(404).json({ message: 'Job not found' });
+    }
+
+    // Check if the authenticated user is the client who owns the job
+    if (job.client.toString() !== req.user._id.toString()) {
+      return res.status(401).json({ message: 'Not authorized to mark this job as complete' });
+    }
+
+    // Check if the authenticated user is a client
+    if (req.user.role !== 'client') {
+      return res.status(403).json({ message: 'Only clients can mark jobs as complete' });
+    }
+
+    // Only mark as completed if it's currently in-progress or open
+    if (job.status === 'completed') {
+      return res.status(400).json({ message: 'Job is already completed' });
+    }
+
+    job.status = 'completed';
+
+    await job.save();
+
+    res.json({ message: 'Job marked as completed successfully', job });
+  } catch (error: any) {
+    console.error(error.message);
+    res.status(500).send('Server error');
+  }
+};
+
+export { createJob, getJobs, getJobById, updateJob, deleteJob, applyToJob, acceptApplication, rejectApplication, postComment, markJobCompleted };
