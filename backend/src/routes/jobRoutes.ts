@@ -1,5 +1,5 @@
 import express from 'express';
-import { createJob, getJobs, getJobById, updateJob, deleteJob, applyToJob, acceptApplication, rejectApplication } from '../controllers/jobController';
+import { createJob, getJobs, getJobById, updateJob, deleteJob, applyToJob, acceptApplication, rejectApplication, postComment } from '../controllers/jobController';
 import { protect } from '../middleware/authMiddleware';
 
 const router = express.Router();
@@ -15,5 +15,6 @@ router.delete('/:id', protect, deleteJob);
 router.post('/:id/apply', protect, applyToJob);
 router.put('/:jobId/applicants/:applicantId/accept', protect, acceptApplication);
 router.put('/:jobId/applicants/:applicantId/reject', protect, rejectApplication);
+router.post('/:id/comments', protect, postComment);
 
 export default router;

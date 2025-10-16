@@ -208,7 +208,6 @@ const acceptApplication = async (req: Request, res: Response) => {
   }
 };
 
-
 // @desc    Reject an application for a job
 // @route   PUT /api/jobs/:jobId/applicants/:applicantId/reject
 // @access  Private (Client only, owner of job)
@@ -256,4 +255,40 @@ const rejectApplication = async (req: Request, res: Response) => {
   }
 };
 
-export { createJob, getJobs, getJobById, updateJob, deleteJob, applyToJob, acceptApplication, rejectApplication };
+// @desc    Post a comment on a job
+// @route   POST /api/jobs/:id/comments
+// @access  Private
+const postComment = async (req: Request, res: Response) => {
+  const { text } = req.body;
+  const { id } = req.params;
+
+  try {
+    const job = await Job.findById(id);
+
+    if (!job) {
+      return res.status(404).json({ message: 'Job not found' });
+    }
+
+    const comment = {
+      user: req.user._id,
+      text,
+    };
+
+    job.comments.push(comment);
+    await job.save();
+
+    // Populate the user field in the newly added comment for the response
+    const populatedJob = await Job.findById(id).populate(
+      'comments.user', 'username email'
+    );
+    const newComment = populatedJob?.comments[populatedJob.comments.length - 1];
+
+    res.status(201).json(newComment);
+  } catch (error: any) {
+    console.error(error.message);
+    res.status(500).send('Server error');
+  }
+};
+
+export { createJob, getJobs, getJobById, updateJob, deleteJob, applyToJob, acceptApplication, rejectApplication, postComment };
+
