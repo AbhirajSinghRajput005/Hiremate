@@ -1,0 +1,30 @@
+# Node.js
+node_modules/
+dist/
+
+# Environment variables
+.env
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+thumbs.db
+
+# IDE specific files
+.vscode/
+.idea/
+
+# npm debug logs
+npm-debug.log*
+yarn-debug.log*
+
+# package-lock.json (if you prefer not to commit it, though often it is committed)
+package-lock.json
+
+# Frontend build output (if applicable, for future frontend build)
+frontend/dist/
+
+# MongoDB data files (if running locally within project)
+*.mongodb/
