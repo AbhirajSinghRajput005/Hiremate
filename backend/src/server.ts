@@ -3,7 +3,8 @@ import dotenv from 'dotenv';
 import path from 'path';
 import connectDB from './config/db';
 import authRoutes from './routes/authRoutes';
-import jobRoutes from './routes/jobRoutes'; // Import job routes
+import jobRoutes from './routes/jobRoutes';
+import Job from './models/Job'; // Import Job model
 
 dotenv.config();
 
@@ -24,8 +25,19 @@ app.get('/', (req, res) => {
   res.render('index', { title: 'HireMate Home', heading: 'Welcome to HireMate!' });
 });
 
+// New route to display jobs
+app.get('/jobs', async (req, res) => {
+  try {
+    const jobs = await Job.find({}).populate('client', 'username email');
+    res.render('jobs', { title: 'Available Jobs', jobs });
+  } catch (error: any) {
+    console.error(error.message);
+    res.status(500).send('Server error');
+  }
+});
+
 app.use('/api/auth', authRoutes);
-app.use('/api/jobs', jobRoutes); // Mount job routes
+app.use('/api/jobs', jobRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

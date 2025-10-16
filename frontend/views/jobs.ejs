@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <h1><%= title %></h1>
+
+    <div id="jobs-list">
+        <% if (jobs.length > 0) { %>
+            <% jobs.forEach(job => { %>
+                <div class="job-card">
+                    <h2><%= job.title %></h2>
+                    <p><strong>Client:</strong> <%= job.client.username %> (<%= job.client.email %>)</p>
+                    <p><strong>Description:</strong> <%= job.description %></p>
+                    <p><strong>Budget:</strong> $<%= job.budget %></p>
+                    <p><strong>Deadline:</strong> <%= new Date(job.deadline).toLocaleDateString() %></p>
+                    <p><strong>Tags:</strong> <%= job.tags.join(', ') %></p>
+                    <p><strong>Status:</strong> <%= job.status %></p>
+                    <p><strong>Applicants:</strong> <%= job.applicants.length %></p>
+                    <p><strong>Comments:</strong> <%= job.comments.length %></p>
+                    <a href="/jobs/<%= job._id %>">View Details</a>
+                </div>
+            <% }) %>
+        <% } else { %>
+            <p>No jobs available at the moment.</p>
+        <% } %>
+    </div>
+
+    <script src="/script.js"></script>
+</body>
+</html>
