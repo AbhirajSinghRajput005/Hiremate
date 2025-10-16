@@ -208,4 +208,52 @@ const acceptApplication = async (req: Request, res: Response) => {
   }
 };
 
-export { createJob, getJobs, getJobById, updateJob, deleteJob, applyToJob, acceptApplication };
+
+// @desc    Reject an application for a job
+// @route   PUT /api/jobs/:jobId/applicants/:applicantId/reject
+// @access  Private (Client only, owner of job)
+const rejectApplication = async (req: Request, res: Response) => {
+  try {
+    const { jobId, applicantId } = req.params;
+
+    const job = await Job.findById(jobId);
+
+    if (!job) {
+      return res.status(404).json({ message: 'Job not found' });
+    }
+
+    // Check if the authenticated user is the client who owns the job
+    if (job.client.toString() !== req.user._id.toString()) {
+      return res.status(401).json({ message: 'Not authorized to manage this job' });
+    }
+
+    // Check if the authenticated user is a client
+    if (req.user.role !== 'client') {
+      return res.status(403).json({ message: 'Only clients can reject applications' });
+    }
+
+    const applicant = job.applicants.find(
+      (app: any) => app.user.toString() === applicantId
+    );
+
+    if (!applicant) {
+      return res.status(404).json({ message: 'Applicant not found for this job' });
+    }
+
+    // Only reject if currently pending
+    if (applicant.status !== 'pending') {
+      return res.status(400).json({ message: 'Application is not pending' });
+    }
+
+    applicant.status = 'rejected';
+
+    await job.save();
+
+    res.json({ message: 'Application rejected successfully', job });
+  } catch (error: any) {
+    console.error(error.message);
+    res.status(500).send('Server error');
+  }
+};
+
+export { createJob, getJobs, getJobById, updateJob, deleteJob, applyToJob, acceptApplication, rejectApplication };
