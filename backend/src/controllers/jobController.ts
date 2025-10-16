@@ -113,4 +113,40 @@ const deleteJob = async (req: Request, res: Response) => {
   }
 };
 
-export { createJob, getJobs, getJobById, updateJob, deleteJob };
+// @desc    Apply to a job
+// @route   POST /api/jobs/:id/apply
+// @access  Private (Freelancer only)
+const applyToJob = async (req: Request, res: Response) => {
+  try {
+    const job = await Job.findById(req.params.id);
+
+    if (!job) {
+      return res.status(404).json({ message: 'Job not found' });
+    }
+
+    // Check if user is a freelancer
+    if (req.user.role !== 'freelancer') {
+      return res.status(403).json({ message: 'Only freelancers can apply to jobs' });
+    }
+
+    // Check if freelancer has already applied
+    const alreadyApplied = job.applicants.some(
+      (applicant: any) => applicant.user.toString() === req.user._id.toString()
+    );
+
+    if (alreadyApplied) {
+      return res.status(400).json({ message: 'You have already applied to this job' });
+    }
+
+    // Add applicant to the job
+    job.applicants.push({ user: req.user._id });
+    await job.save();
+
+    res.status(200).json({ message: 'Application submitted successfully' });
+  } catch (error: any) {
+    console.error(error.message);
+    res.status(500).send('Server error');
+  }
+};
+
+export { createJob, getJobs, getJobById, updateJob, deleteJob, applyToJob };
