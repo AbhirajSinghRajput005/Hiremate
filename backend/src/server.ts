@@ -4,7 +4,8 @@ import path from 'path';
 import connectDB from './config/db';
 import authRoutes from './routes/authRoutes';
 import jobRoutes from './routes/jobRoutes';
-import Job from './models/Job'; // Import Job model
+import Job from './models/Job';
+import User from './models/User'; // Import User model for populating comments
 
 dotenv.config();
 
@@ -25,11 +26,30 @@ app.get('/', (req, res) => {
   res.render('index', { title: 'HireMate Home', heading: 'Welcome to HireMate!' });
 });
 
-// New route to display jobs
+// Route to display all jobs
 app.get('/jobs', async (req, res) => {
   try {
     const jobs = await Job.find({}).populate('client', 'username email');
     res.render('jobs', { title: 'Available Jobs', jobs });
+  } catch (error: any) {
+    console.error(error.message);
+    res.status(500).send('Server error');
+  }
+});
+
+// New route to display single job details
+app.get('/jobs/:id', async (req, res) => {
+  try {
+    const job = await Job.findById(req.params.id)
+      .populate('client', 'username email')
+      .populate('applicants.user', 'username email')
+      .populate('comments.user', 'username email');
+
+    if (!job) {
+      return res.status(404).render('404', { title: 'Job Not Found' }); // Render a 404 page
+    }
+
+    res.render('job_details', { title: job.title, job });
   } catch (error: any) {
     console.error(error.message);
     res.status(500).send('Server error');

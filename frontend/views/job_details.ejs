@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <a href="/jobs">Back to Jobs</a>
+    <h1><%= job.title %></h1>
+
+    <div class="job-details-container">
+        <p><strong>Client:</strong> <%= job.client.username %> (<%= job.client.email %>)</p>
+        <p><strong>Description:</strong> <%= job.description %></p>
+        <p><strong>Budget:</strong> $<%= job.budget %></p>
+        <p><strong>Deadline:</strong> <%= new Date(job.deadline).toLocaleDateString() %></p>
+        <p><strong>Tags:</strong> <%= job.tags.join(', ') %></p>
+        <p><strong>Status:</strong> <%= job.status %></p>
+
+        <h2>Applicants (<%= job.applicants.length %>)</h2>
+        <% if (job.applicants.length > 0) { %>
+            <div class="applicants-list">
+                <% job.applicants.forEach(applicant => { %>
+                    <div class="applicant-card">
+                        <p><strong>Applicant:</strong> <%= applicant.user.username %> (<%= applicant.user.email %>)</p>
+                        <p><strong>Status:</strong> <%= applicant.status %></p>
+                        <p><strong>Applied On:</strong> <%= new Date(applicant.appliedAt).toLocaleDateString() %></p>
+                        <!-- Client actions (Accept/Reject) would go here -->
+                    </div>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <p>No applicants yet.</p>
+        <% } %>
+
+        <h2>Comments (<%= job.comments.length %>)</h2>
+        <div class="comments-section">
+            <% if (job.comments.length > 0) { %>
+                <% job.comments.forEach(comment => { %>
+                    <div class="comment-card">
+                        <p><strong><%= comment.user.username %>:</strong> <%= comment.text %></p>
+                        <p class="comment-date"><%= new Date(comment.createdAt).toLocaleString() %></p>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p>No comments yet.</p>
+            <% } %>
+            <!-- Form to post new comment would go here -->
+        </div>
+    </div>
+
+    <script src="/script.js"></script>
+</body>
+</html>
