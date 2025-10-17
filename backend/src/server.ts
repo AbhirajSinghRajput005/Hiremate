@@ -5,7 +5,7 @@ import connectDB from './config/db';
 import authRoutes from './routes/authRoutes';
 import jobRoutes from './routes/jobRoutes';
 import Job from './models/Job';
-import User from './models/User'; // Import User model for populating comments
+import User from './models/User';
 
 dotenv.config();
 
@@ -37,7 +37,7 @@ app.get('/jobs', async (req, res) => {
   }
 });
 
-// New route to display single job details
+// Route to display single job details
 app.get('/jobs/:id', async (req, res) => {
   try {
     const job = await Job.findById(req.params.id)
@@ -55,6 +55,10 @@ app.get('/jobs/:id', async (req, res) => {
     res.status(500).send('Server error');
   }
 });
+
+// New EJS routes for Login and Signup pages
+app.get('/login', (req, res) => res.render('login', { title: 'Login' }));
+app.get('/signup', (req, res) => res.render('signup', { title: 'Sign Up' }));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/jobs', jobRoutes);
