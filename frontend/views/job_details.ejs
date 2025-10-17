@@ -1,55 +1,270 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
-    <link rel="stylesheet" href="/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= job.title %> - HireMate</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-    <a href="/jobs">Back to Jobs</a>
-    <h1><%= job.title %></h1>
-
-    <div class="job-details-container">
-        <p><strong>Client:</strong> <%= job.client.username %> (<%= job.client.email %>)</p>
-        <p><strong>Description:</strong> <%= job.description %></p>
-        <p><strong>Budget:</strong> $<%= job.budget %></p>
-        <p><strong>Deadline:</strong> <%= new Date(job.deadline).toLocaleDateString() %></p>
-        <p><strong>Tags:</strong> <%= job.tags.join(', ') %></p>
-        <p><strong>Status:</strong> <%= job.status %></p>
-
-        <h2>Applicants (<%= job.applicants.length %>)</h2>
-        <% if (job.applicants.length > 0) { %>
-            <div class="applicants-list">
-                <% job.applicants.forEach(applicant => { %>
-                    <div class="applicant-card">
-                        <p><strong>Applicant:</strong> <%= applicant.user.username %> (<%= applicant.user.email %>)</p>
-                        <p><strong>Status:</strong> <%= applicant.status %></p>
-                        <p><strong>Applied On:</strong> <%= new Date(applicant.appliedAt).toLocaleDateString() %></p>
-                        <!-- Client actions (Accept/Reject) would go here -->
-                    </div>
-                <% }) %>
-            </div>
-        <% } else { %>
-            <p>No applicants yet.</p>
-        <% } %>
-
-        <h2>Comments (<%= job.comments.length %>)</h2>
-        <div class="comments-section">
-            <% if (job.comments.length > 0) { %>
-                <% job.comments.forEach(comment => { %>
-                    <div class="comment-card">
-                        <p><strong><%= comment.user.username %>:</strong> <%= comment.text %></p>
-                        <p class="comment-date"><%= new Date(comment.createdAt).toLocaleString() %></p>
-                    </div>
-                <% }) %>
-            <% } else { %>
-                <p>No comments yet.</p>
-            <% } %>
-            <!-- Form to post new comment would go here -->
-        </div>
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-custom">
+    <div class="container">
+      <a class="navbar-brand" href="/">HireMate</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/jobs">Browse Jobs</a>
+          </li>
+          <li class="nav-item client-only hidden">
+            <a class="nav-link" href="/post-job">Post Job</a>
+          </li>
+          <li class="nav-item auth-required hidden">
+            <a class="nav-link" href="/profile">My Profile</a>
+          </li>
+          <li class="nav-item guest-only">
+            <a class="nav-link" href="/login">Login</a>
+          </li>
+          <li class="nav-item guest-only">
+            <a class="nav-link" href="/signup">Sign Up</a>
+          </li>
+          <li class="nav-item auth-required hidden">
+            <a class="nav-link" href="#" id="logout-btn">Logout</a>
+          </li>
+        </ul>
+      </div>
     </div>
+  </nav>
 
-    <script src="/script.js"></script>
+  <!-- Job Details Section -->
+  <div class="container mt-4 mb-5">
+    <div class="row">
+      <!-- Job Information -->
+      <div class="col-lg-8 mb-4">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="mb-0"><%= job.title %></h3>
+            <span class="badge job-status-badge <%= job.isCompleted ? 'job-status-completed' : 'job-status-open' %>">
+              <%= job.isCompleted ? 'Completed' : 'Open' %>
+            </span>
+          </div>
+          <div class="card-body">
+            <h5>Description</h5>
+            <p><%= job.description %></p>
+            
+            <hr>
+            
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <strong>Budget:</strong> $<%= job.budget %>
+              </div>
+              <div class="col-md-6">
+                <strong>Deadline:</strong> <%= new Date(job.deadline).toLocaleDateString() %>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <strong>Posted by:</strong> <%= job.client.username %>
+            </div>
+            
+            <% if (job.tags && job.tags.length > 0) { %>
+              <div class="mb-3">
+                <strong>Tags:</strong><br>
+                <% job.tags.forEach(function(tag) { %>
+                  <span class="tag"><%= tag %></span>
+                <% }); %>
+              </div>
+            <% } %>
+            
+            <div class="mb-3">
+              <strong>Posted on:</strong> <%= new Date(job.createdAt).toLocaleDateString() %>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="mt-4">
+              <!-- Apply Button for Freelancers -->
+              <button 
+                id="apply-btn" 
+                class="btn btn-success freelancer-only hidden" 
+                data-job-id="<%= job._id %>"
+                <%= job.applicants && job.applicants.some(a => a.user && a.user._id) ? 'disabled' : '' %>
+              >
+                <%= job.applicants && job.applicants.some(a => a.user && a.user._id) ? 'Already Applied' : 'Apply to Job' %>
+              </button>
+              
+              <!-- Complete Job Button for Client Owner -->
+              <button 
+                id="complete-job-btn" 
+                class="btn btn-primary client-only hidden" 
+                data-job-id="<%= job._id %>"
+                data-client-id="<%= job.client._id %>"
+                <%= job.isCompleted ? 'disabled' : '' %>
+              >
+                <%= job.isCompleted ? 'Job Completed' : 'Mark as Completed' %>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Applicants Section -->
+      <div class="col-lg-4 mb-4">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Applicants (<%= job.applicants ? job.applicants.length : 0 %>)</h5>
+          </div>
+          <div class="card-body">
+            <% if (job.applicants && job.applicants.length > 0) { %>
+              <% job.applicants.forEach(function(applicant) { %>
+                <div class="applicant-card applicant-status-<%= applicant.status %>">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                      <strong><%= applicant.user ? applicant.user.username : 'Unknown' %></strong>
+                      <br>
+                      <small class="text-muted"><%= applicant.user ? applicant.user.email : '' %></small>
+                    </div>
+                    <span class="badge bg-<%= applicant.status === 'accepted' ? 'success' : (applicant.status === 'rejected' ? 'danger' : 'warning') %>">
+                      <%= applicant.status.charAt(0).toUpperCase() + applicant.status.slice(1) %>
+                    </span>
+                  </div>
+                  
+                  <div class="small text-muted mb-2">
+                    Applied: <%= new Date(applicant.appliedAt).toLocaleDateString() %>
+                  </div>
+                  
+                  <!-- Accept/Reject Buttons for Client Owner -->
+                  <% if (applicant.status === 'pending') { %>
+                    <div class="btn-group btn-group-sm w-100 client-only hidden" data-client-id="<%= job.client._id %>">
+                      <button 
+                        class="btn btn-success accept-btn" 
+                        data-job-id="<%= job._id %>" 
+                        data-applicant-id="<%= applicant._id %>"
+                      >
+                        Accept
+                      </button>
+                      <button 
+                        class="btn btn-danger reject-btn" 
+                        data-job-id="<%= job._id %>" 
+                        data-applicant-id="<%= applicant._id %>"
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  <% } %>
+                </div>
+              <% }); %>
+            <% } else {
+              // Check if the current user is the client and the job is open
+              const currentUser = getCurrentUser();
+              if (currentUser && currentUser.role === 'client' && currentUser.id === job.client._id.toString() && job.status === 'open') { %>
+                <p class="text-muted text-center mb-0">No applicants yet. Share your job to attract freelancers!</p>
+              <% } else { %>
+                <p class="text-muted text-center mb-0">No applicants yet.</p>
+              <% } %>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Comments Section -->
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Comments & Discussion</h5>
+          </div>
+          <div class="card-body">
+            <!-- Comment Form -->
+            <div class="auth-required hidden mb-4">
+              <form id="comment-form" data-job-id="<%= job._id %>">
+                <div class="mb-3">
+                  <label for="comment-text" class="form-label fw-bold">Add a Comment</label>
+                  <textarea 
+                    class="form-control" 
+                    id="comment-text" 
+                    rows="3" 
+                    placeholder="Share your thoughts or ask a question..."
+                    required
+                  ></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Post Comment</button>
+              </form>
+            </div>
+            
+            <div class="guest-only mb-4">
+              <div class="alert alert-info" role="alert">
+                <a href="/login" class="alert-link">Login</a> to post comments
+              </div>
+            </div>
+            
+            <hr>
+            
+            <!-- Comments List -->
+            <div id="comments-list">
+              <% if (job.comments && job.comments.length > 0) { %>
+                <% job.comments.forEach(function(comment) { %>
+                  <div class="comment-box">
+                    <div class="comment-author">
+                      <%= comment.user ? comment.user.username : 'Anonymous' %>
+                    </div>
+                    <div class="comment-date">
+                      <%= new Date(comment.createdAt).toLocaleString() %>
+                    </div>
+                    <p class="comment-text"><%= comment.text %></p>
+                  </div>
+                <% }); %>
+              <% } else { %>
+                <p class="text-muted text-center">No comments yet. Be the first to comment!</p>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-dark text-white text-center py-4 mt-auto">
+    <div class="container">
+      <p class="mb-0">&copy; 2025 HireMate. Empowering Student Freelancers.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/script.js"></script>
+  <script>
+    // Additional client-specific logic
+    document.addEventListener('DOMContentLoaded', function() {
+      const currentUser = getCurrentUser();
+      
+      if (currentUser && currentUser.role === 'client' && currentUser.id === '<%= job.client._id %>') {
+        // Show client-specific controls
+        document.querySelectorAll('.client-only').forEach(el => {
+          el.classList.remove('hidden');
+        });
+      }
+      
+      // Check if current user has already applied
+      if (currentUser && currentUser.role === 'freelancer') {
+        const applyBtn = document.getElementById('apply-btn');
+        <% if (job.applicants && job.applicants.length > 0) { %>
+          const applicantIds = [<% job.applicants.forEach(function(app, index) { %>'<%= app.user ? app.user._id : "" %>'<%= index < job.applicants.length - 1 ? ',' : '' %><% }); %>];
+          if (applicantIds.includes(currentUser.id)) {
+            if (applyBtn) {
+              applyBtn.disabled = true;
+              applyBtn.textContent = 'Already Applied';
+            }
+          }
+        <% } %>
+      }
+    });
+  </script>
 </body>
 </html>
