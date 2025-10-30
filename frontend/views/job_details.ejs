@@ -86,30 +86,51 @@
               <strong>Posted on:</strong> <%= new Date(job.createdAt).toLocaleDateString() %>
             </div>
             
-            <!-- Action Buttons -->
-            <div class="mt-4">
-              <!-- Apply Button for Freelancers -->
-              <button 
-                id="apply-btn" 
-                class="btn btn-success freelancer-only hidden" 
-                data-job-id="<%= job._id %>"
-                <%= job.applicants && job.applicants.some(a => a.user && a.user._id) ? 'disabled' : '' %>
-              >
-                <%= job.applicants && job.applicants.some(a => a.user && a.user._id) ? 'Already Applied' : 'Apply to Job' %>
-              </button>
-              
-              <!-- Complete Job Button for Client Owner -->
-              <button 
-                id="complete-job-btn" 
-                class="btn btn-primary client-only hidden" 
-                data-job-id="<%= job._id %>"
-                data-client-id="<%= job.client._id %>"
-                <%= job.isCompleted ? 'disabled' : '' %>
-              >
-                <%= job.isCompleted ? 'Job Completed' : 'Mark as Completed' %>
-              </button>
-            </div>
-          </div>
+                                        <!-- Action Buttons -->
+            
+                                      <div class="mt-4">
+            
+                                        <!-- Apply Button for Freelancers -->
+            
+                                        <button 
+            
+                                          id="apply-btn" 
+            
+                                          class="btn btn-success freelancer-only hidden" 
+            
+                                          data-job-id="<%= job._id %>"
+            
+                                          <%= job.applicants && job.applicants.some(a => a.user && a.user._id) ? 'disabled' : '' %>
+            
+                                        >
+            
+                                          <%= job.applicants && job.applicants.some(a => a.user && a.user._id) ? 'Already Applied' : 'Apply to Job' %>
+            
+                                        </button>
+            
+                                        
+            
+                                        <!-- Complete Job Button for Client Owner -->
+            
+                                        <button 
+            
+                                          id="complete-job-btn" 
+            
+                                          class="btn btn-primary client-only hidden" 
+            
+                                          data-job-id="<%= job._id %>"
+            
+                                          data-client-id="<%= job.client._id %>"
+            
+                                          <%= job.isCompleted ? 'disabled' : '' %>
+            
+                                        >
+            
+                                          <%= job.isCompleted ? 'Job Completed' : 'Mark as Completed' %>
+            
+                                        </button>
+            
+                                      </div>          </div>
         </div>
       </div>
       
