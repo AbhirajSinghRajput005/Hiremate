@@ -31,7 +31,7 @@ const registerUser = async (req: Request, res: Response) => {
     await user.save();
 
     // Generate JWT
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET as string, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user._id, role: user.role, username: user.username }, process.env.JWT_SECRET as string, { expiresIn: '1h' });
 
     res.status(201).json({ message: 'User registered successfully', token });
   } catch (error: any) {
@@ -60,7 +60,7 @@ const loginUser = async (req: Request, res: Response) => {
     }
 
     // Generate JWT
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET as string, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user._id, role: user.role, username: user.username }, process.env.JWT_SECRET as string, { expiresIn: '1h' });
 
     res.json({ message: 'Logged in successfully', token });
   } catch (error: any) {

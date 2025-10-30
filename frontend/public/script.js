@@ -1,4 +1,7 @@
-// HireMate Frontend - Vanilla JavaScript Logic// ============= UTILITY FUNCTIONS =============// Get JWT token from localStoragefunction getToken() {  return localStorage.getItem('jwt_token');
+// HireMate Frontend - Vanilla JavaScript Logic
+// ============= UTILITY FUNCTIONS =============
+// Get JWT token from localStorage
+function getToken() {  return localStorage.getItem('jwt_token');
 }
 
 // Set JWT token in localStorage
